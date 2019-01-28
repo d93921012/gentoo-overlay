@@ -1,0 +1,9 @@
+[Unit]
+Description=VMware Authentication Daemon
+After=vmware.target
+PartOf=vmware-workstation-server.target
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+ExecStart=/opt/vmware/sbin/vmware-authdlauncher

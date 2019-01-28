@@ -1,0 +1,11 @@
+[Unit]
+Description=VMware Workstation server Service(s)
+Requires=vmware.target
+After=vmware.target
+Wants=vmware-authentication.service
+Wants=vmware-hostd.service
+
+[Service]
+
+[Install]
+WantedBy=multi-user.target
