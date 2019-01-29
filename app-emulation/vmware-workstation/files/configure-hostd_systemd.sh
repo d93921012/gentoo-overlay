@@ -12,7 +12,7 @@ case $action in
     systemctl -q stop vmware-workstation-server.target
     ;;
   status)
-    systemctl -q is-active vmware-workstation-server && echo on || echo off
+    systemctl -q is-active vmware-workstation-server.target && echo on || echo off
     ;;
   *)
     exit 1
