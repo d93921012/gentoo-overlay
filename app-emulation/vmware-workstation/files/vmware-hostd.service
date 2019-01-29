@@ -1,0 +1,14 @@
+[Unit]
+Description=VMware Workstation Server
+After=vmware-authentication.service
+PartOf=vmware-workstation-server.target
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+ExecStartPre=sh /opt/vmware/lib/vmware/bin/check-certificates.sh
+
+PIDFile=/var/run/vmware/vmware-hostd.PID
+ExecStart=/opt/vmware/bin/vmware-hostd -a -d /etc/vmware/hostd/config.xml
+
+ExecStop=sh /opt/vmware/lib/vmware/bin/shutdown-autostart-vm.sh

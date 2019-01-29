@@ -22,9 +22,8 @@ SRC_URI="
 		vmware-tools-darwinPre15? ( https://softwareupdate.vmware.com/cds/vmw-desktop/fusion/${VMWARE_FUSION_VER}/packages/com.vmware.fusion.tools.darwinPre15.zip.tar -> com.vmware.fusion.tools.darwinPre15-${PV}.zip.tar )
 		vmware-tools-darwin? ( https://softwareupdate.vmware.com/cds/vmw-desktop/fusion/${VMWARE_FUSION_VER}/packages/com.vmware.fusion.tools.darwin.zip.tar -> com.vmware.fusion.tools.darwin-${PV}.zip.tar )
 	)
-	systemd? ( https://github.com/akhuettel/systemd-vmware/archive/${SYSTEMD_UNITS_TAG}.tar.gz -> vmware-systemd-${SYSTEMD_UNITS_TAG}.tgz )
 	"
-
+	
 LICENSE="GPL-2 GPL-3 MIT-with-advertising vmware"
 SLOT="0"
 KEYWORDS="~amd64"
@@ -191,6 +190,7 @@ RDEPEND="
 	net-dns/libidn
 	net-libs/gnutls
 	cups? ( net-print/cups )
+	server? ( sys-apps/lsb-release )
 	sys-apps/tcp-wrappers
 	sys-apps/util-linux
 	x11-libs/libXxf86vm
@@ -401,9 +401,7 @@ src_install() {
         fi
         
         if use systemd; then
-            dobin "${FILESDIR}"/configure-hostd_systemd.sh
-            mv "${D}${VM_INSTALL_DIR}"/lib/vmware/bin/configure-hostd_systemd.sh \
-                "${D}${VM_INSTALL_DIR}"/lib/vmware/bin/configure-hostd.sh
+            newbin "${FILESDIR}"/configure-hostd_systemd.sh configure-hostd.sh
         fi
 
 		# install the libraries
@@ -414,7 +412,7 @@ src_install() {
             "${VM_INSTALL_DIR}"/lib/vmware/lib/libvmware-vim-cmd.so/libvmware-vim-cmd.so
 
 		into "${VM_INSTALL_DIR}"
-		for tool in vmware-hostd wssc-adminTool ; do
+		for tool in vmware-hostd vmware-wssc-adminTool ; do
 			cat > "${T}/${tool}" <<-EOF
 				#!/usr/bin/env bash
 				set -e
@@ -495,7 +493,7 @@ src_install() {
 	fperms 0755 "${VM_INSTALL_DIR}"/lib/vmware/lib/libvmware-gksu.so/gksu-run-helper
 	fperms 4711 "${VM_INSTALL_DIR}"/sbin/vmware-authd
 	if use server; then
-		fperms 0755 "${VM_INSTALL_DIR}"/bin/{vmware-hostd,vmware-vim-cmd,wssc-adminTool}
+		fperms 0755 "${VM_INSTALL_DIR}"/bin/{vmware-hostd,vmware-vim-cmd,vmware-wssc-adminTool}
 		fperms 1777 "${VM_DATA_STORE_DIR}"
 	fi
 	if use vix; then
@@ -674,12 +672,14 @@ src_install() {
 
 	# install systemd unit files
 	if use systemd; then
-		systemd_dounit "${WORKDIR}/systemd-vmware-${SYSTEMD_UNITS_TAG}/"*.{service,target}
+		systemd_dounit "${FILESDIR}/"vmware-{usb,vmblock,vmci,vmmon,vmnet,vmsock}.service
+		systemd_dounit "${FILESDIR}"/vmware.target
 		
 		if use server; then
-            systemd_dounit "${FILESDIR}/"*.{service,target}
+            systemd_dounit "${FILESDIR}/"vmware-{authentication,hostd}.service
+            systemd_dounit "${FILESDIR}/"vmware-workstation-server.target
 		fi
-	fi
+	fi        
 
 	# enable macOS guests support
 	if use macos-guests; then
