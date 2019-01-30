@@ -1,8 +1,8 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI="3"
+EAPI=6
 inherit eutils toolchain-funcs flag-o-matic
 
 DESCRIPTION="Another Traditional Chinese IM."
@@ -32,30 +32,8 @@ RESTRICT="mirror"
 S=${WORKDIR}/${P/_/.}
 
 src_prepare() {
-	echo "${P}" > ${S}/VERSION.gcin
-	
-	# Remove Qt5PlatformSupport, because Qt 5.6.0 has removed this componet
-	if has_version '>=dev-qt/qtcore-5.5.1:5' ; then
-        sed -i 's/Qt5PlatformSupport//' \
-                "${S}"/qt5-im/Makefile \
-                || die 'sed failed'
-        sed -i 's/QtDBus/Qt5DBus/' \
-                "${S}"/qt5-im/Makefile \
-                || die 'sed failed'
-        sed -i 's/-I$(QTINC)\/QtGui\/$(MODVERSION)\/QtGui/& -I$(QTINC)\/QtGui\/$(MODVERSION) -I$(QTINC)\/QtCore\/$(MODVERSION)/' \
-                "${S}"/qt5-im/Makefile \
-                || die 'sed failed'
-        sed -i 's/org.qt-project.Qt.QPlatformInputContextFactoryInterface/&.5.1/' \
-                "${S}"/qt5-im/gcin-qt5.h.in \
-                || die 'sed failed'
-    fi
-    
-    # Qt5 requires C++11 support
-    if use qt5 ; then
-        sed -i 's/CXXFLAGS=/&-std=c++11 /' \
-                "${S}"/qt5-im/Makefile \
-                || die 'sed failed'
-    fi
+	default
+	echo "${PV}" > ${S}/VERSION.gcin
 }
 
 src_configure() {
